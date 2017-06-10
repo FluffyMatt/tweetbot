@@ -3,42 +3,20 @@ var config = require('./config');
 
 var Twitter = new twit(config);
 
-var params = {
-        q: '#HoCRT, #hocrt, #HOCRT',
-        result_type: 'recent',
-        lang: 'en'
-    }
+var stream = Twitter.stream('statuses/filter', { track: '#HoCRT,#hocrt,#HOCRT' })
 
-var run = function() {
+stream.on('tweet', function(tweet) {
+    likeAndRetweet(tweet.id_str)
+})
 
-    Twitter.get('search/tweets', params)
+var likeAndRetweet = function(idStr) {
+    
+    Twitter.post('statuses/retweet/:id', { id: idStr}, function(err, data, response) {
 
-        .catch(function(err) {
-            console.log(err);
-        })
+    });
 
-        .then (function (tweets) {
+    Twitter.post('favorites/create', { id : idStr}, function(err, data, response) {
 
-            tweets = tweets.data.statuses;
-
-            for (var i = 0; i < tweets.length; i++) {
-                //console.log(tweets[i].id_str);
-                Twitter.post('statuses/retweet/:id', { id: tweets[i].id_str})
-                        
-                        .catch(function(err) {
-                            console.log('retweeted already')
-                        })
-
-                        .then(function(response) {
-                            console.log(response)
-                        })
-
-            }
-
-        })
+    })
 
 }
-
-
-run();
-//likeAndRetweet(retweet, 900000);*/
